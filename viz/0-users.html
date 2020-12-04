@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<style type="text/css" media="screen, print">
+			body { margin: 30px 50px; font-family: sans-serif; }
+		</style>
+		<title>Users</title>
+	</head>
+	<body>
+		<h1>Users</h1>
+
+		<script src="../vendor/d3/d3.js"></script>
+		<script>
+
+var body = d3.select("body");
+
+d3.tsv("../data/users.tsv", d => (
+	{
+		user_id: d['#user_id'],
+		name:    d.name,
+		house:   d.house,
+		institution: d.institution,
+	}
+
+)).then(function(data) {
+
+	let divs = body.selectAll('.user')
+    	.data(data)
+	  .enter().append('div')
+	    .attr('class', 'user')
+	    .text(d => `${d.user_id}. ${d.name} ${d.house} ${ d.institution == '' ? '' : `(${d.institution})`}`);
+
+});
+
+		</script>
+	</body>
+</html>
