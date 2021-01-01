@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<style type="text/css" media="screen, print">
+		body {
+			margin: 30px 50px;
+			font-family: sans-serif;
+		}
+
+		.bar-agg {
+			fill: crimson;
+		}
+
+		.bar-avg {
+			fill: steelblue;
+			opacity: 0.5;
+		}
+	</style>
+	<title>CO2 Emission Bars</title>
+</head>
+
+<body>
+	<h1>CO<sub>2</sub> Emission Bars</h1>
+
+	<script src="../vendor/d3/d3.js"></script>
+	<script>
+
+		var parse_time = d3.timeParse("%Y-%m-%d");
+		var format_percent = d3.format('.0%');
+
+		// set the dimensions and margins of the graph
+		var margin = { top: 20, right: 40, bottom: 30, left: 40 },
+			width = 960 - margin.left - margin.right,
+			height = 500 - margin.top - margin.bottom;
+
+		var x = d3.scaleBand()
+			.range([0, width])
+			.padding(0.1)
+
+		var y0 = d3.scaleLinear()
+			.range([height, 0])
+			.clamp(true);
+
+		var y1 = d3.scaleLinear()
+			.range([height, 0])
+			.clamp(true);
+
+		var svg = d3.select("body").append("svg")
+			.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom)
+			.append("g")
+			.attr("transform",
+				"translate(" + margin.left + "," + margin.top + ")");
+
+
+		Promise.all([
+
+			d3.tsv("../data/missions.tsv", d => ({
+				mission_id: +d['#mission_id'],
+				user_id: +d.user_id,
+				place_id: +d.place_id,
+				date: parse_time(d.date),
+				duration: +d.duration,
+				mode: d.mode,
+				co2: +d.co2,
+			})),
+			d3.tsv("../data/users.tsv", d => ({
+				user_id: +d['#user_id'],
+				name: d.name,
+				house: d.house,
+				region: d.region,
+				institution: d.institution,
+			})),
+			d3.tsv("../data/places.tsv", d => ({
+				place_id: +d['#place_id'],
+				distance: +d.distance,
+				country: d.country,
+			})),
+			d3.tsv("../data/countries.tsv", d => ({
+				alpha: d['#alpha2'],
+				country: d.country,
+				continent: d.continent,
+			})),
+
+
+		]).then(function (data) {
+
+			let missions = data[0];
+			let users = Object.fromEntries(data[1].map(u => [u.user_id, u]));
+			let places = Object.fromEntries(data[2].map(p => [p.place_id, p]));
+			let countries = Object.fromEntries(data[3].map(c => [c.alpha, c]));
+
+			let houses = Object.keys(Object.fromEntries(data[1].map(u => [u.house])));
+			let regions = Object.keys(Object.fromEntries(data[1].map(u => [u.region])));
+
+			// emission per user
+
+			let emissions = Object.fromEntries(Object.keys(users).map(u_id => [u_id, 0]));
+
+			let house_count = Object.fromEntries(houses.map(house => [house, 0]));
+			let house_emissions = Object.fromEntries(houses.map(house => [house, 0]));
+			let region_count = Object.fromEntries(regions.map(region => [region, 0]));
+			let region_emissions = Object.fromEntries(regions.map(region => [region, 0]));
+
+			for (let mission of missions) {
+				emissions[mission.user_id] += mission.co2 * places[mission.place_id].distance / 1000; // tons of CO2
+
+				house_count[users[mission.user_id].house]++
+				house_emissions[users[mission.user_id].house] += mission.co2 * places[mission.place_id].distance / 1000; // tons of CO2
+				region_count[users[mission.user_id].region]++
+				region_emissions[users[mission.user_id].region] += mission.co2 * places[mission.place_id].distance / 1000; // tons of CO2
+			}
+
+			region_emissions_avg = regions.map(k => 1000 * region_emissions[k] / region_count[k])
+
+			// Scale the range of the data in the domains
+			x.domain(regions);
+			y0.domain([0, d3.max(Object.values(region_emissions))]);
+			y1.domain([0, d3.max(region_emissions_avg)]);
+
+			var region_data = regions.map(k => ({ region: k, emissions: region_emissions[k] }));
+			var region_data_avg = regions.map(k => ({ region: k, emissions: region_emissions[k] * 1000 / region_count[k] }));
+
+			// append the rectangles for the bar chart
+			svg.selectAll(".bar-agg")
+				.data(region_data)
+				.enter().append("rect")
+				.attr("class", "bar-agg")
+				.attr("x", function (d) { return x(d.region); })
+				.attr("width", x.bandwidth())
+				.attr("y", function (d) { return y0(d.emissions); })
+				.attr("height", function (d) { return height - y0(d.emissions); });
+
+			// append the rectangles for the bar chart
+			svg.selectAll(".bar-avg")
+				.data(region_data_avg)
+				.enter().append("rect")
+				.attr("class", "bar-avg")
+				.attr("x", function (d) { return x(d.region); })
+				.attr("width", x.bandwidth())
+				.attr("y", function (d) { return y0(d.emissions); })
+				.attr("height", function (d) { return height - y0(d.emissions); });
+
+			// add the x Axis
+			svg.append("g")
+				.attr("transform", "translate(0," + height + ")")
+				.call(d3.axisBottom(x));
+
+			// add the y0 Axis
+			svg.append("g")
+				.call(d3.axisLeft(y0));
+
+			// add the y1 Axis
+			svg.append("g")
+				.attr("transform", "translate( " + width + ", 0 )")
+				.call(d3.axisRight(y1));
+		});
+	</script>
+</body>
+
+</html>
