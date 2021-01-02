@@ -23,6 +23,9 @@
 <body>
 	<h1>CO<sub>2</sub> Emissions Bar Chart</h1>
 
+	<button onclick="update(regions, region_emissions, region_emissions_avg)">Regions</button>
+	<button onclick="update(titles, title_emissions, title_emissions_avg)">Titles</button>
+
 	<script src="../vendor/d3/d3.js"></script>
 	<script>
 
@@ -56,6 +59,8 @@
 			.attr("transform",
 				"translate(" + margin.left + "," + margin.top + ")");
 
+		var regions, region_emissions, region_emissions_avg
+		var titles, title_emissions, title_emissions_avg
 
 		Promise.all([
 
@@ -71,6 +76,7 @@
 			d3.tsv("../data/users.tsv", d => ({
 				user_id: +d['#user_id'],
 				name: d.name,
+				title: d.title,
 				house: d.house,
 				region: d.region,
 				institution: d.institution,
@@ -95,7 +101,8 @@
 			let countries = Object.fromEntries(data[3].map(c => [c.alpha, c]));
 
 			let houses = Object.keys(Object.fromEntries(data[1].map(u => [u.house])));
-			let regions = Object.keys(Object.fromEntries(data[1].map(u => [u.region])));
+			regions = Object.keys(Object.fromEntries(data[1].map(u => [u.region])));
+			titles = Object.keys(Object.fromEntries(data[1].map(u => [u.title])));
 
 			// emission per user
 
@@ -104,28 +111,41 @@
 			let house_count = Object.fromEntries(houses.map(house => [house, 0]));
 			let house_emissions = Object.fromEntries(houses.map(house => [house, 0]));
 			let region_count = Object.fromEntries(regions.map(region => [region, 0]));
-			let region_emissions = Object.fromEntries(regions.map(region => [region, 0]));
+			region_emissions = Object.fromEntries(regions.map(region => [region, 0]));
+			let title_count = Object.fromEntries(titles.map(title => [title, 0]));
+			title_emissions = Object.fromEntries(titles.map(title => [title, 0]));
 
 			for (let mission of missions) {
-				emissions[mission.user_id] += mission.co2 * places[mission.place_id].distance / 1000; // tons of CO2
-
 				house_count[users[mission.user_id].house]++
 				house_emissions[users[mission.user_id].house] += mission.co2 * places[mission.place_id].distance / 1000; // tons of CO2
 				region_count[users[mission.user_id].region]++
 				region_emissions[users[mission.user_id].region] += mission.co2 * places[mission.place_id].distance / 1000; // tons of CO2
+				title_count[users[mission.user_id].title]++
+				title_emissions[users[mission.user_id].title] += mission.co2 * places[mission.place_id].distance / 1000; // tons of CO2
 			}
 
-			let region_emissions_avg = Object.fromEntries(regions.map(region => [region, 0]));
+			region_emissions_avg = Object.fromEntries(regions.map(region => [region, 0]));
 			for (let k in regions) {
 				region = regions[k]
 				region_emissions_avg[region] = 1000 * region_emissions[region] / region_count[region]
 			}
 
+			title_emissions_avg = Object.fromEntries(titles.map(title => [title, 0]));
+			for (let k in titles) {
+				title = titles[k]
+				title_emissions_avg[title] = 1000 * title_emissions[title] / title_count[title]
+			}
+			
+			//update(regions, region_emissions, region_emissions_avg)
+			update(titles, title_emissions, title_emissions_avg)
+		});
+
+		function update(categories, data, data_avg) {
 			// Scale the range of the data in the domains
 			let subgroups = ['aggregate', 'average']
-			x.domain(regions);
-			y_agg.domain([0, d3.max(Object.values(region_emissions))]);
-			y_avg.domain([0, d3.max(Object.values(region_emissions_avg))]);
+			x.domain(categories);
+			y_agg.domain([0, d3.max(Object.values(data))]);
+			y_avg.domain([0, d3.max(Object.values(data_avg))]);
 			color.domain(subgroups)
 
 			var x_sub = d3.scaleBand()
@@ -135,42 +155,51 @@
 
 			var ys = { aggregate: y_agg, average: y_avg }
 
-			var region_data = regions.map(k => ({
-				region: k,
-				aggregate: region_emissions[k],
-				average: region_emissions_avg[k]
+			var data = categories.map(k => ({
+				category: k,
+				aggregate: data[k],
+				average: data_avg[k]
 			}));
 
 			// Show the bars
-			svg.append("g")
+			var bars = svg.append("g")
 				.selectAll("g")
+				.data(data)
 				// Enter in data = loop group per group
-				.data(region_data)
 				.enter()
 				.append("g")
-				.attr("transform", function (d) { return "translate(" + x(d.region) + ",0)"; })
+				.attr("transform", function (d) { return "translate(" + x(d.category) + ",0)"; })
 				.selectAll("rect")
-				.data(function (d) { return subgroups.map(function (key) { return { key: key, value: d[key] }; }); })
+			bars.data(function (d) { return subgroups.map(function (key) { return { key: key, value: d[key] }; }); })
 				.enter().append("rect")
+				.merge(bars)
+				.transition()
+				.duration(750)
 				.attr("x", function (d) { return x_sub(d.key); })
 				.attr("y", function (d) { return ys[d.key](d.value); })
 				.attr("width", x_sub.bandwidth())
 				.attr("height", function (d) { return height - ys[d.key](d.value); })
 				.attr("fill", function (d) { return color(d.key); });
 
+			bars = bars
+				.exit()
+				.remove()
+
 			// add the x Axis
 			svg.append("g")
 				.attr("transform", "translate(0," + height + ")")
+				.transition().duration(1000)
 				.call(d3.axisBottom(x).tickSize(0));
 			svg.append("text")
 				.attr("text-anchor", "end")
 				.attr("x", width / 2 + 50)
 				.attr("y", height + margin.top)
-				.text("Regions");
+				.text("Titles");
 
 			// add the y_agg Axis
 			svg.append("g")
 				.attr('class', 'agg')
+				.transition().duration(1000)
 				.call(d3.axisLeft(y_agg));
 			svg.append("text")
 				.attr("text-anchor", "end")
@@ -183,6 +212,7 @@
 			svg.append("g")
 				.attr('class', 'avg')
 				.attr("transform", "translate( " + width + ", 0 )")
+				.transition().duration(1000)
 				.call(d3.axisRight(y_avg));
 			svg.append("text")
 				.attr("text-anchor", "end")
@@ -190,7 +220,7 @@
 				.attr("y", width + 50)
 				.attr("x", -margin.top)
 				.html("Avg. Emissions (Kg)")
-		});
+		}
 	</script>
 </body>
 
