@@ -16,6 +16,12 @@
 		.avg {
 			color: steelblue
 		}
+
+		.center {
+			display: block;
+			margin: auto;
+		}
+
 	</style>
 	<title>CO2 Emissions Bar Chart</title>
 </head>
@@ -23,8 +29,16 @@
 <body>
 	<h1>CO<sub>2</sub> Emissions Bar Chart</h1>
 
-	<button onclick="update(regions, region_emissions, region_emissions_avg)">Regions</button>
-	<button onclick="update(titles, title_emissions, title_emissions_avg)">Titles</button>
+	<div>
+		<select id="cat_select" class="center">
+			<option value="0">Select a category:</option>
+			<option value="1" selected>Region</option>
+			<option value="2">House</option>
+			<option value="3">Title</option>
+			<option value="4">Rank</option>
+			<option value="5">Institution</option>
+		</select>
+	</div>
 
 	<script src="../vendor/d3/d3.js"></script>
 	<script>
@@ -33,8 +47,8 @@
 		var format_percent = d3.format('.0%');
 
 		// set the dimensions and margins of the graph
-		var margin = { top: 40, right: 80, bottom: 80, left: 80 },
-			width = 960 - margin.left - margin.right,
+		var margin = { top: 80, right: 80, bottom: 80, left: 80 },
+			width = 1024 - margin.left - margin.right,
 			height = 500 - margin.top - margin.bottom;
 
 		var x = d3.scaleBand()
@@ -53,14 +67,47 @@
 			.range(['crimson', 'steelblue'])
 
 		var svg = d3.select("body").append("svg")
+			.attr("class", "center")
 			.attr("width", width + margin.left + margin.right)
 			.attr("height", height + margin.top + margin.bottom)
 			.append("g")
 			.attr("transform",
 				"translate(" + margin.left + "," + margin.top + ")");
 
+		var x_axis = svg.append("g")
+			.attr("transform", "translate(0," + height + ")")
+
+		var y_agg_axis = svg.append("g")
+			.attr('class', 'agg')
+
+
+		var y_avg_axis = svg.append("g")
+			.attr('class', 'avg')
+			.attr("transform", "translate( " + width + ", 0 )")
+
+		var x_label = svg.append("text")
+			.attr("text-anchor", "end")
+			.attr("x", width / 2 + 50)
+			.attr("y", height + margin.top - 10)
+
+		var y_agg_label = svg.append("text")
+			.attr("text-anchor", "end")
+			.attr("transform", "rotate(-90)")
+			.attr("y", -margin.left + 40)
+			.attr("x", -margin.top)
+
+		var y_avg_label = svg.append("text")
+			.attr("text-anchor", "end")
+			.attr("transform", "rotate(-90)")
+			.attr("y", width + 50)
+			.attr("x", -margin.top)
+
+		var datasets = []
 		var regions, region_emissions, region_emissions_avg
 		var titles, title_emissions, title_emissions_avg
+		var ranks, rank_emissions, rank_emissions_avg
+		var institutions, institution_emissions, institution_emissions_avg
+		var houses, house_emissions, house_emissions_avg
 
 		Promise.all([
 
@@ -77,6 +124,7 @@
 				user_id: +d['#user_id'],
 				name: d.name,
 				title: d.title,
+				rank: d.rank,
 				house: d.house,
 				region: d.region,
 				institution: d.institution,
@@ -103,17 +151,20 @@
 			let houses = Object.keys(Object.fromEntries(data[1].map(u => [u.house])));
 			regions = Object.keys(Object.fromEntries(data[1].map(u => [u.region])));
 			titles = Object.keys(Object.fromEntries(data[1].map(u => [u.title])));
-
-			// emission per user
-
-			let emissions = Object.fromEntries(Object.keys(users).map(u_id => [u_id, 0]));
+			ranks = Object.keys(Object.fromEntries(data[1].map(u => [u.rank])));
+			institutions = Object.keys(Object.fromEntries(data[1].map(u => [u.institution])));
+			//institutions[institutions.indexOf("")] = "Other"
 
 			let house_count = Object.fromEntries(houses.map(house => [house, 0]));
-			let house_emissions = Object.fromEntries(houses.map(house => [house, 0]));
+			house_emissions = Object.fromEntries(houses.map(house => [house, 0]));
 			let region_count = Object.fromEntries(regions.map(region => [region, 0]));
 			region_emissions = Object.fromEntries(regions.map(region => [region, 0]));
 			let title_count = Object.fromEntries(titles.map(title => [title, 0]));
 			title_emissions = Object.fromEntries(titles.map(title => [title, 0]));
+			let rank_count = Object.fromEntries(ranks.map(rank => [rank, 0]));
+			rank_emissions = Object.fromEntries(ranks.map(rank => [rank, 0]));
+			let institution_count = Object.fromEntries(institutions.map(institution => [institution, 0]));
+			institution_emissions = Object.fromEntries(institutions.map(institution => [institution, 0]));
 
 			for (let mission of missions) {
 				house_count[users[mission.user_id].house]++
@@ -122,6 +173,10 @@
 				region_emissions[users[mission.user_id].region] += mission.co2 * places[mission.place_id].distance / 1000; // tons of CO2
 				title_count[users[mission.user_id].title]++
 				title_emissions[users[mission.user_id].title] += mission.co2 * places[mission.place_id].distance / 1000; // tons of CO2
+				rank_count[users[mission.user_id].rank]++
+				rank_emissions[users[mission.user_id].rank] += mission.co2 * places[mission.place_id].distance / 1000; // tons of CO2
+				institution_count[users[mission.user_id].institution]++
+				institution_emissions[users[mission.user_id].institution] += mission.co2 * places[mission.place_id].distance / 1000; // tons of CO2
 			}
 
 			region_emissions_avg = Object.fromEntries(regions.map(region => [region, 0]));
@@ -130,17 +185,54 @@
 				region_emissions_avg[region] = 1000 * region_emissions[region] / region_count[region]
 			}
 
+			house_emissions_avg = Object.fromEntries(houses.map(house => [house, 0]));
+			for (let k in houses) {
+				house = houses[k]
+				house_emissions_avg[house] = 1000 * house_emissions[house] / house_count[house]
+			}
+
 			title_emissions_avg = Object.fromEntries(titles.map(title => [title, 0]));
 			for (let k in titles) {
 				title = titles[k]
 				title_emissions_avg[title] = 1000 * title_emissions[title] / title_count[title]
 			}
-			
-			//update(regions, region_emissions, region_emissions_avg)
-			update(titles, title_emissions, title_emissions_avg)
+
+			rank_emissions_avg = Object.fromEntries(ranks.map(rank => [rank, 0]));
+			for (let k in ranks) {
+				rank = ranks[k]
+				rank_emissions_avg[rank] = 1000 * rank_emissions[rank] / rank_count[rank]
+			}
+
+			institution_emissions_avg = Object.fromEntries(institutions.map(institution => [institution, 0]));
+			for (let k in institutions) {
+				institution = institutions[k]
+				institution_emissions_avg[institution] = 1000 * institution_emissions[institution] / institution_count[institution]
+			}
+
+			datasets.push({ categories: regions, data: region_emissions, data_avg: region_emissions_avg, x_label: "Regions" })
+			datasets.push({ categories: houses, data: house_emissions, data_avg: house_emissions_avg, x_label: "Houses" })
+			datasets.push({ categories: titles, data: title_emissions, data_avg: title_emissions_avg, x_label: "Titles" })
+			datasets.push({ categories: ranks, data: rank_emissions, data_avg: rank_emissions_avg, x_label: "Ranks" })
+			datasets.push({ categories: institutions, data: institution_emissions, data_avg: institution_emissions_avg, x_label: "Institutions" })
+
+			update(datasets[0])
 		});
 
-		function update(categories, data, data_avg) {
+		// When the button is changed, run the updateChart function
+		d3.select("#cat_select").on("change", function (d) {
+			// recover the option that has been chosen
+			var option = d3.select(this).property("value")
+			// run the updateChart function with this selected option
+			if (option > 0 && option <= datasets.length) {
+				update(datasets[option - 1])
+			}
+		})
+
+		function update(dataset) {
+			var categories = dataset.categories
+			var data = dataset.data
+			var data_avg = dataset.data_avg
+
 			// Scale the range of the data in the domains
 			let subgroups = ['aggregate', 'average']
 			x.domain(categories);
@@ -162,16 +254,24 @@
 			}));
 
 			// Show the bars
-			var bars = svg.append("g")
-				.selectAll("g")
+			var bar_groups = svg
+				.selectAll("g.layer")
 				.data(data)
-				// Enter in data = loop group per group
-				.enter()
+
+			bar_groups.enter()
 				.append("g")
+				.merge(bar_groups)
+				.classed('layer', true)
 				.attr("transform", function (d) { return "translate(" + x(d.category) + ",0)"; })
-				.selectAll("rect")
-			bars.data(function (d) { return subgroups.map(function (key) { return { key: key, value: d[key] }; }); })
-				.enter().append("rect")
+
+			//bar_groups.exit().transition().duration(300).remove();
+			bar_groups.exit().remove();
+
+			// Enter in data = loop group per group
+			var bars = svg.selectAll("g.layer").selectAll("rect")
+				.data(function (d) { return subgroups.map(function (key) { return { key: key, value: d[key] }; }); })
+
+			bars.enter().append("rect")
 				.merge(bars)
 				.transition()
 				.duration(750)
@@ -181,45 +281,33 @@
 				.attr("height", function (d) { return height - ys[d.key](d.value); })
 				.attr("fill", function (d) { return color(d.key); });
 
-			bars = bars
-				.exit()
-				.remove()
+			//bars.exit().transition().duration(300).attr('height', 0).attr("y", ys.aggregate(0)).remove();
+			bars.exit().remove();
 
 			// add the x Axis
-			svg.append("g")
-				.attr("transform", "translate(0," + height + ")")
-				.transition().duration(1000)
-				.call(d3.axisBottom(x).tickSize(0));
-			svg.append("text")
-				.attr("text-anchor", "end")
-				.attr("x", width / 2 + 50)
-				.attr("y", height + margin.top)
-				.text("Titles");
+			x_axis.transition().duration(750)
+				.call(d3.axisBottom(x).tickSize(0))
+				.selectAll("text")
+				.style("text-anchor", "end")
+				.attr("dx", "-.8em")
+				.attr("dy", ".15em")
+				.attr("transform", function (d) {
+					return "rotate(-60)";
+				});
+			x_label.transition().duration(750)
+				.text(dataset.x_label);
 
 			// add the y_agg Axis
-			svg.append("g")
-				.attr('class', 'agg')
-				.transition().duration(1000)
+			y_agg_axis.transition().duration(750)
 				.call(d3.axisLeft(y_agg));
-			svg.append("text")
-				.attr("text-anchor", "end")
-				.attr("transform", "rotate(-90)")
-				.attr("y", -margin.left + 40)
-				.attr("x", -margin.top)
+			y_agg_label
 				.text("Total Emissions (Tons)")
 
 			// add the y_avg Axis
-			svg.append("g")
-				.attr('class', 'avg')
-				.attr("transform", "translate( " + width + ", 0 )")
-				.transition().duration(1000)
+			y_avg_axis.transition().duration(750)
 				.call(d3.axisRight(y_avg));
-			svg.append("text")
-				.attr("text-anchor", "end")
-				.attr("transform", "rotate(-90)")
-				.attr("y", width + 50)
-				.attr("x", -margin.top)
-				.html("Avg. Emissions (Kg)")
+			y_avg_label
+				.text("Avg. Emissions (Kg)")
 		}
 	</script>
 </body>
