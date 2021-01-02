@@ -67,7 +67,7 @@
 		var format_percent = d3.format('.0%');
 
 		// set the dimensions and margins of the graph
-		var margin = { top: 80, right: 80, bottom: 80, left: 80 },
+		var margin = { top: 40, right: 80, bottom: 120, left: 80 },
 			width = 1024 - margin.left - margin.right,
 			height = 500 - margin.top - margin.bottom;
 
@@ -110,19 +110,19 @@
 		var x_label = svg.append("text")
 			.attr("text-anchor", "end")
 			.attr("x", width / 2 + 50)
-			.attr("y", height + margin.top - 10)
+			.attr("y", height + margin.bottom - 10)
 
 		var y_agg_label = svg.append("text")
 			.attr("text-anchor", "end")
 			.attr("transform", "rotate(-90)")
 			.attr("y", -margin.left + 40)
-			.attr("x", -margin.top)
+			.attr("x", -margin.bottom + 30)
 
 		var y_avg_label = svg.append("text")
 			.attr("text-anchor", "end")
 			.attr("transform", "rotate(-90)")
 			.attr("y", width + 50)
-			.attr("x", -margin.top)
+			.attr("x", -margin.bottom + 30)
 
 		var datasets = []
 		var regions, region_emissions, region_emissions_avg
@@ -175,7 +175,7 @@
 			titles = Object.keys(Object.fromEntries(data[1].map(u => [u.title])));
 			ranks = Object.keys(Object.fromEntries(data[1].map(u => [u.rank])));
 			institutions = Object.keys(Object.fromEntries(data[1].map(u => [u.institution])));
-			//institutions[institutions.indexOf("")] = "Other"
+			institutions.splice(institutions.indexOf(""), 1);
 
 			let house_count = Object.fromEntries(houses.map(house => [house, 0]));
 			house_emissions = Object.fromEntries(houses.map(house => [house, 0]));
