@@ -6,7 +6,7 @@
 	<style type="text/css" media="screen, print">
 		body {
 			margin: 30px 50px;
-			font-family: sans-serif;
+			font-family: 'Audiowide', cursive;
 		}
 
 		.agg {
@@ -14,20 +14,38 @@
 		}
 
 		.avg {
-			color: steelblue
+			color: lightseagreen
 		}
 
 		.center {
 			display: block;
 			margin: auto;
+			text-align: center;
 		}
 
+		.tooltip {
+			position: absolute;
+			display: none;
+			width: auto;
+			height: auto;
+			background: none repeat scroll 0 0 rgba(0, 0, 0, 0.75);
+			border: 0 none;
+			border-radius: 2px;
+			box-shadow: -2px 2px 15px rgba(0, 0, 0, 0.5);
+			color: white;
+			font: 12px sans-serif;
+			padding: 5px;
+			text-align: center;
+			text-transform: capitalize;
+		}
 	</style>
-	<title>CO2 Emissions Bar Chart</title>
+	 <link rel="preconnect" href="https://fonts.gstatic.com">
+	 <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet"> 
+	<title>CO2 Emissions Grouped Bar Chart</title>
 </head>
 
 <body>
-	<h1>CO<sub>2</sub> Emissions Bar Chart</h1>
+	<h1 class="center">CO<sub>2</sub> Emissions Grouped Bar Chart</h1>
 
 	<div>
 		<select id="cat_select" class="center">
@@ -41,6 +59,8 @@
 	</div>
 
 	<script src="../vendor/d3/d3.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.7.1/d3-tip.min.js"></script>
+
 	<script>
 
 		var parse_time = d3.timeParse("%Y-%m-%d");
@@ -64,7 +84,7 @@
 			.clamp(true);
 
 		var color = d3.scaleOrdinal()
-			.range(['crimson', 'steelblue'])
+			.range(['crimson', 'lightseagreen'])
 
 		var svg = d3.select("body").append("svg")
 			.attr("class", "center")
@@ -73,6 +93,8 @@
 			.append("g")
 			.attr("transform",
 				"translate(" + margin.left + "," + margin.top + ")");
+
+		var tooltip = d3.select("body").append("div").attr("class", "tooltip");
 
 		var x_axis = svg.append("g")
 			.attr("transform", "translate(0," + height + ")")
@@ -218,11 +240,8 @@
 			update(datasets[0])
 		});
 
-		// When the button is changed, run the updateChart function
 		d3.select("#cat_select").on("change", function (d) {
-			// recover the option that has been chosen
 			var option = d3.select(this).property("value")
-			// run the updateChart function with this selected option
 			if (option > 0 && option <= datasets.length) {
 				update(datasets[option - 1])
 			}
@@ -235,6 +254,7 @@
 
 			// Scale the range of the data in the domains
 			let subgroups = ['aggregate', 'average']
+			let units = { aggregate: 'Tons', average: 'Kg' }
 			x.domain(categories);
 			y_agg.domain([0, d3.max(Object.values(data))]);
 			y_avg.domain([0, d3.max(Object.values(data_avg))]);
@@ -264,7 +284,6 @@
 				.classed('layer', true)
 				.attr("transform", function (d) { return "translate(" + x(d.category) + ",0)"; })
 
-			//bar_groups.exit().transition().duration(300).remove();
 			bar_groups.exit().remove();
 
 			// Enter in data = loop group per group
@@ -273,6 +292,14 @@
 
 			bars.enter().append("rect")
 				.merge(bars)
+				.on("mousemove", function (e, d) {
+					tooltip
+						.style("left", e.pageX + 25 + "px")
+						.style("top", e.pageY - 10 + "px")
+						.style("display", "inline-block")
+						.html("<strong><span style='color:" + color(d.key) + "'>" + (d.key) + ":</span></strong> " + (d.value.toFixed(2)) + " " + units[d.key]);
+				})
+				.on("mouseout", function (e, d) { tooltip.style("display", "none"); })
 				.transition()
 				.duration(750)
 				.attr("x", function (d) { return x_sub(d.key); })
@@ -281,7 +308,6 @@
 				.attr("height", function (d) { return height - ys[d.key](d.value); })
 				.attr("fill", function (d) { return color(d.key); });
 
-			//bars.exit().transition().duration(300).attr('height', 0).attr("y", ys.aggregate(0)).remove();
 			bars.exit().remove();
 
 			// add the x Axis
