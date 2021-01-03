@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+		<script src="../vendor/d3/d3.js"></script>
+		<style type="text/css" media="screen, print">
+			body { margin: 30px 50px; font-family: 'Audiowide', cursive; }
+			path { fill: none;}
+			.center{
+				display: block;
+				margin: auto;
+				text-align: center;
+			}
+		</style>
+		<link rel="preconnect" href="https://fonts.gstatic.com">
+		<link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
+        <title>CO2 Emissions by Continent</title>
+    </head>
+    <body class="center">
+        <h1>CO<sub>2</sub> Emissions by Continent</h1>
+        <script>
+			// format date
+            var parse_time = d3.timeParse("%Y-%m-%d");
+			// format year of date
+			var parse_year = d3.timeParse("%Y");
+            var format_percent = d3.format('.0%');
+			// define margin
+            var margin = ({top: 30, right: 50, bottom: 30, left: 50})
+			// define width
+			var width = 954;
+			// define height 
+			var height = 500;
+			// circle radius
+			var radius = 4;
+			// Years-scale
+            var year_scale = d3.scaleTime()
+                               .range([margin.left, width - margin.right]);
+            // CO2-scale
+            var co2_scale = d3.scaleLinear()
+                              .range([height - margin.bottom, margin.top]);
+
+            // SVG
+			var canvas = d3.select('body')
+						   .append('svg')
+						   .attr('width', width)
+						   .attr('height', height + 50 );
+
+            Promise.all([
+				// get missions data
+                d3.tsv("../data/missions.tsv", d => ({
+		            mission_id: +d['#mission_id'],
+		            user_id:    +d.user_id,
+		            place_id:   +d.place_id,
+		            date:        parse_time(d.date),
+		            duration:   +d.duration,
+		            mode:        d.mode,
+		            co2:        +d.co2,
+	            })),
+	            // get users data
+				d3.tsv("../data/users.tsv", d => ({
+		            user_id:    +d['#user_id'],
+		            name:        d.name,
+		            house:       d.house,
+		            institution: d.institution,
+	            })),
+	            // get places data
+				d3.tsv("../data/places.tsv", d => ({
+		            place_id:  +d['#place_id'],
+		            distance:  +d.distance,
+		            country:    d.country,
+	            })),
+	            // get countries data
+				d3.tsv("../data/countries.tsv", d => ({
+		            alpha:     d['#alpha2'],
+		            country:   d.country,
+		            continent: d.continent,
+	            })),
+            ]).then(function(data){
+                var missions_data = data[0];
+				var place_data = data[2];
+				var countries_data = data[3];
+				var years = missions_data.map(d => d.date.getFullYear()).filter((v, i, a) => a.indexOf(v) == i);
+				var continents = countries_data.map(d => d.continent).filter((v, i, a) => a.indexOf(v) == i);
+				//var continents = continents.filter(d => d != "NA");
+				year_scale.domain([d3.min(years, d => parse_year(d)), d3.max(years, d => parse_year(d))]);
+				co2_scale.domain([0, 70]);
+				// Year axis
+				var year_axis = g => g
+									 .attr("transform", `translate(0,${height - margin.bottom})`)
+    							     .call(d3.axisBottom(year_scale));
+				// CO2 axis
+				var co2_axis = g => g
+									.attr("transform", `translate(${margin.left} ,0)`)
+                                    .call(d3.axisLeft(co2_scale))
+				var lineGenerator = d3.line()
+									  .x(d => year_scale(d.year))
+									  .y(d => co2_scale(d.co2));
+									  
+				var colors = ["darkorange", "crimson", "green", "blue", "indigo", "violet", "gold"] 
+				// get emiisions of CO2 by continent and year
+				var i = 0, x = 100, y = height + 10;
+				for(var continent of continents){
+					var id = continent, active = 1;
+					var emissions_data = get_emissions_year(continent, missions_data, countries_data, place_data, years);
+					displayCircles(canvas, radius, colors[i], emissions_data, id);
+					displayLine(canvas, lineGenerator, colors[i], emissions_data, id, active);
+					Hide_Show_line(canvas, x, y, colors[i], id);
+					i++;
+					x += 100; 
+				}
+				canvas.append('g')
+					  .call(year_axis);
+				canvas.append('g')
+					  .call(co2_axis);
+				canvas.append("text").attr("x", 0).attr("y", 15).text("CO2 (Tons)")
+				canvas.append("text").attr("x", width - 45).attr("y", height-30).text("Year")  
+			});
+			// get missions by continent
+			function get_missions_by_continent(continent, missions_data, countries_data, place_data){
+				var misssions_by_continent = [];
+				var places_ids = continent_to_place_id(continent, countries_data, place_data);
+				for(var place_id of places_ids){
+					var m = missions_data.filter(d => d.place_id == place_id);
+					misssions_by_continent = misssions_by_continent.concat(m);
+				}
+				return misssions_by_continent;
+			}
+			// convert continent to place_id
+			function continent_to_place_id(continent, countries_data, place_data){
+				var countries_code = continent_to_countries_code(continent, countries_data);
+				var places_ids = countries_code_to_place_id(countries_code, place_data);
+				return places_ids;
+			};
+			// convert continent to countirs_code
+			function continent_to_countries_code(continent, countries_data){
+				var countries_code = countries_data.filter(d => d.continent == continent).map(d => d.alpha);
+				return countries_code;
+			};
+			// convert countries_code to place_id
+			function countries_code_to_place_id(countries_code, place_data){
+				var places_id = [];
+				for(var country_code of countries_code){
+					var m = place_data.filter(d => d.country == country_code).map(d => d.place_id);
+					places_id = places_id.concat(m);
+				}
+				return places_id;
+			};
+			//display Circles
+			function displayCircles(canvas, radius, color, data, class_id) {
+					var circles = canvas.selectAll('circle1')
+						       		.data(data)
+						       		.enter()
+						   				.append('circle')
+										.attr('class', class_id)
+									    .attr('cx', d => year_scale(d.year))
+									    .attr('cy', d => co2_scale(d.co2))
+										.style("fill",color)
+									    .attr('r', radius);
+			}
+            // display line
+			function displayLine(canvas, lineGenerator, color, data, id, active){
+					var line = canvas.append('path')
+									 .attr("id", id)
+									 .attr('stroke-width', "3")
+									 .attr("active", active)
+								     .attr('d', lineGenerator(data))
+								     .attr('stroke', color);
+			};
+			// get CO2 emissions(tons) per yer
+			function get_emissions_year(continent, missions_data, countries_data, place_data, years){
+					var missions_by_continent = get_missions_by_continent(continent, missions_data, countries_data, place_data);
+					// emissions per year
+					var emissions = Object.fromEntries(years.map(d => [d, 0]));
+					var places = Object.fromEntries(place_data.map(p => [p.place_id, p]));
+					for(var mission of missions_by_continent) {
+						emissions[mission.date.getFullYear()] += mission.co2 * places[mission.place_id].distance / 1000; // tons of CO2
+					}
+					var emissions_data = Object.keys(emissions).map(d => ({
+							year: parse_year(d),
+							co2: emissions[d]
+					}));
+					return emissions_data;
+				};
+			// show/hide graph
+			function Hide_Show_line(canvas, x, y, color, id){
+					canvas.append("text").attr("x",x)
+									 .attr("y", y)
+									 .attr('class', 'legend')
+									 .style("fill", color)
+									 .on('click', function(){
+										// Determine if current line is visible
+										var class_id = id;
+										var new_id = "#".concat(class_id);
+										var path_id = "path".concat(new_id)
+										var circle_id = ".".concat(class_id)
+										var active = d3.select(path_id).attr("active");
+										var activem   = active == 1 ? 1 : 0;
+		  								var newOpacity = activem == 1 ? 0 : 1;
+										// Hide or show the elements
+										d3.select(path_id).style("opacity", newOpacity);
+										d3.selectAll(circle_id).style("fill-opacity", newOpacity);
+										// Update whether or not the elements are active
+										d3.select(path_id).attr("active", newOpacity);
+									    })
+									 .text(id)
+
+				} 
+		
+		
+		</script>
+    </body>
+</html>
