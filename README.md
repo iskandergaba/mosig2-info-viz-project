@@ -9,8 +9,8 @@ A data information visualization project that seeks to help users visually answe
 ## Visualizations
 We propose two [D3.js](https://d3js.org/) visualizations:
 
-- **[CO<sub>2</sub> Emissions Grouped Bar Chart](viz/co2-bar-chart.html.html):** A dynamic grouped bar chart that details the CO<sub>2</sub> emissions by different decompositions of travelers so as to understand the impact of the region, house, title, rank, and institution on the CO<sub>2</sub> emissions.
-- **[CO<sub>2</sub> Emissions by Continent](viz/co2-bar-chart.html.html):** A muti-line plot that depicts the CO<sub>2</sub> emissions amont per continent destination over the years so as to understand the data trends of each continent destination and compare them to one another.
+- **[CO<sub>2</sub> Emissions Grouped Bar Chart](viz/co2-bar-chart.html) (Iskander Gaba):** A dynamic grouped bar chart that details the CO<sub>2</sub> emissions by different decompositions of travelers so as to understand the impact of the region, house, title, rank, and institution on the CO<sub>2</sub> emissions.
+- **[CO<sub>2</sub> Emissions by Continent](viz/co2-by-continent.html) (Moncif Toubouh):** A muti-line plot that depicts the CO<sub>2</sub> emissions amont per continent destination over the years so as to understand the data trends of each continent destination and compare them to one another.
 
 ## Requirements
 All what you need to run this project is a machine with [Python](https://www.python.org) and a JavaScript-capable modern browser (we recommend [Mozilla Firefox](https://www.mozilla.org/en-US/firefox/new)) installed.
