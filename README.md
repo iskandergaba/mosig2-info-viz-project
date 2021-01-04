@@ -1,4 +1,4 @@
-# Information Visualization 2020-21 
+# Information Visualization Project 2020-21 
 
 A data information visualization project that seeks to help users visually answer a few questions regarding the data trends in a CO<sub>2</sub> emissions dataset of academic laboratory work travels with all identifying information anonymized using Game of Thrones character and location names.
 
