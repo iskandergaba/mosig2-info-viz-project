@@ -14,7 +14,9 @@
   <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
 
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
+    rel="stylesheet">
 
   <!-- Vendor CSS Files -->
   <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -28,12 +30,6 @@
   <!-- Template Main CSS File -->
   <link href="assets/css/style.css" rel="stylesheet">
 
-  <!-- =======================================================
-  * Template Name: Presento - v1.1.0
-  * Template URL: https://bootstrapmade.com/presento-bootstrap-corporate-template/
-  * Author: BootstrapMade.com
-  * License: https://bootstrapmade.com/license/
-  ======================================================== -->
 </head>
 
 <body>
@@ -51,7 +47,7 @@
             <ul>
               <li class="active"><a href="#header">Home</a></li>
               <li><a href="#about">About</a></li>
-              <li><a href="#services">Visualizations</a></li>
+              <li><a href="#viz">Visualizations</a></li>
             </ul>
           </nav><!-- .nav-menu -->
         </div>
@@ -87,9 +83,11 @@
         <div class="row no-gutters">
           <div class="content col-xl-5 d-flex align-items-stretch">
             <div class="content">
-              <h3>Information Visualization 2020-21</h3>
+              <h3>Information Visualization Project 2020-21</h3>
               <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Duis aute irure dolor in reprehenderit
+                A data information visualization project that seeks to help users visually answer a few
+                questions regarding the data trends in a CO<sub>2</sub> emissions dataset of academic
+                laboratory travels with all identifying information anonymized with Game of Thrones names.
               </p>
             </div>
           </div>
@@ -97,12 +95,16 @@
             <div class="icon-boxes d-flex flex-column justify-content-center">
               <div class="row">
                 <div class="col-md-6 icon-box" data-aos="fade-up" data-aos-delay="100">
-                  <img src="assets/img/iskander.jpg" alt="Avatar" style="border-radius: 50%; width: 80px; height: 80px; object-fit: cover;"> 
+                  <img src="assets/img/iskander.jpg" alt="Avatar"
+                    style="border-radius: 50%; width: 80px; height: 80px; object-fit: cover;">
                   <h4>Iskander Gaba</h4>
-                  <p><a href="mailto:iskander.gaba@etu.univ-grenoble-alpes.fr">iskander.gaba@etu.univ-grenoble-alpes.fr</a></p>
+                  <p><a
+                      href="mailto:iskander.gaba@etu.univ-grenoble-alpes.fr">iskander.gaba@etu.univ-grenoble-alpes.fr</a>
+                  </p>
                 </div>
                 <div class="col-md-6 icon-box" data-aos="fade-up" data-aos-delay="200">
-                  <img src="assets/img/moncif.png" alt="Avatar" style="border-radius: 50%; width: 80px; height: 80px; object-fit: cover;"> 
+                  <img src="assets/img/moncif.png" alt="Avatar"
+                    style="border-radius: 50%; width: 80px; height: 80px; object-fit: cover;">
                   <h4>Moncif Toubouh</h4>
                   <p><a href="mailto:moncif.toubouh@grenoble-inp.org">moncif.toubouh@grenoble-inp.org</a></p>
                 </div>
@@ -110,19 +112,20 @@
             </div><!-- End .content-->
           </div>
         </div>
-
       </div>
     </section><!-- End About Section -->
 
-    
 
-    <!-- ======= Services Section ======= -->
-    <section id="services" class="services section-bg ">
+
+    <!-- ======= Visualizations Section ======= -->
+    <section id="viz" class="viz section-bg ">
       <div class="container" data-aos="fade-up">
 
         <div class="section-title">
           <h2>Visualizations</h2>
-          <p>Magnam dolores commodi suscipit. Necessitatibus eius consequatur ex aliquid fuga eum quidem. Sit sint consectetur velit. Quisquam quos quisquam cupiditate. Et nemo qui impedit suscipit alias ea.</p>
+          <p>
+            We propose the following visualizations:
+          </p>
         </div>
 
         <div class="row">
@@ -130,99 +133,59 @@
             <div class="icon-box" data-aos="fade-up" data-aos-delay="200">
               <i class="icofont-chart-bar-graph"></i>
               <h4><a href="co2-bar-chart.html" target='_blank'>CO<sub>2</sub> Emissions Grouped Bar Chart</a></h4>
-              <p>Minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat tarad limino ata</p>
+              <p>
+                Realized by <strong>Iskander Gaba</strong>, this grouped bar chart provides explains how different
+                decompositions of travelling researchers (i.e by region, house, title, rank, and institution) impact
+                CO<sub>2</sub> emissions. Given a decomposition of travellers, the x axis depicts categories in that
+                decomposition. The left and right y axes depict the total and average emissions value in tons and
+                kilograms, respectively, for each category. Each point on the x axis has two bars: one represents the
+                total emissions for the category and the other represents emissions per user for that category. The user
+                can change the decomposition from a drop down menu and the chart bars and axes will be dynamically
+                updated.<br />
+                Having the ability to change the chart bar decompositions allows the user to explore visualize the
+                CO<sub>2</sub>
+                emissions impact of each category in a glimpse. Finally, a category could
+                have the largest amount of total pollution due to having the largest number of travellers and not
+                due to inefficiency in travel plans and the average pollutions bar is here to capture that.
+              </p>
             </div>
           </div>
           <div class="col-md-6 mt-4 mt-md-0">
             <div class="icon-box" data-aos="fade-up" data-aos-delay="200">
               <i class="icofont-chart-bar-graph"></i>
-              <h4><a href="co2-by-continent.html" target="_blank">CO<sub>2</sub> Emissions by Destinations Continents</a></h4>
-              <p>This Visualization gives a global insight on how the CO<sub>2</sub> emissions are distributed across continents by year.<br/>
-              It also compares continent distinations emissions in order to find out the continent 
-              destinantion most responsible of CO<sub>2</sub>.We have two quantitativevariables 
-              (time(year), CO2 value), that’s why Ichoose to represent my data in two axis x and y.
-              By convention, Iput time in the x axis as a good practice.The use of the color and the text 
-              to represent the continent is very important to help the user to see the differenceof CO2 
-              emissionsbetween continentand the greatestvalueof CO2.Without forgetting, that the number 
-              of continentsis 5which give us the possibility to use colors to make difference.
-              The use of line is very important inthis case, to see the evolution of the CO2 emission 
-              acrossthe years and to relate CO2 values of continent by year.
-              Then we will have a global vision of CO2 emissions will help us to detect which continent 
-              emit most of CO2.
-              The user can choose to removea specific continent line from the chart by 
-              clicking in the continent name below the chart.</p>
+              <h4><a href="co2-by-continent.html" target="_blank">CO<sub>2</sub> Emissions by Destination Continents</a>
+              </h4>
+              <p>
+                Realized by <strong>Moncif Toubouh</strong>, this visualization provides a global insight on how the
+                CO<sub>2</sub> emissions are distributed across continent destinations over the years as well as
+                a comparative one between different continent destinations.<br />
+                This visualization consists of a graph line per continent destination where years are depicted over the
+                x axis, as it is commonly the case, and the CO<sub>2</sub> emissions in tons are depicted on the y
+                axis. Each of the graphs is drawn with a carefully chosen color so that each one can easily stand out
+                to the eye from the others. The user can also show/hide specific graphs for each continent
+                destination.<br />
+                Having all graphs of all continent destinations in one plot depicted in different colors helps
+                understand
+                the general trend of emissions over the years per continent destination in a glimpse. In particular,
+                the ability to individually show/hide specific graphs makes it possible to easily scan trends for select
+                continent destinations of interest to the user and compare trends between them.
+              </p>
             </div>
           </div>
         </div>
 
       </div>
-    </section><!-- End Services Section -->
+    </section><!-- End Visualizations Section -->
 
   </main><!-- End #main -->
 
   <!-- ======= Footer ======= -->
   <footer id="footer">
-
-    <div class="footer-top">
-      <div class="container">
-        <div class="row">
-
-          <div class="col-lg-3 col-md-6 footer-contact">
-            <h3>Presento<span>.</span></h3>
-            <p>
-              A108 Adam Street <br>
-              New York, NY 535022<br>
-              United States <br><br>
-              <strong>Phone:</strong> +1 5589 55488 55<br>
-              <strong>Email:</strong> info@example.com<br>
-            </p>
-          </div>
-
-          <div class="col-lg-2 col-md-6 footer-links">
-            <h4>Useful Links</h4>
-            <ul>
-              <li><i class="bx bx-chevron-right"></i> <a href="#">Home</a></li>
-              <li><i class="bx bx-chevron-right"></i> <a href="#">Services</a></li>
-              <li><i class="bx bx-chevron-right"></i> <a href="#">Terms of service</a></li>
-              <li><i class="bx bx-chevron-right"></i> <a href="#">Privacy policy</a></li>
-            </ul>
-          </div>
-
-          <div class="col-lg-3 col-md-6 footer-links">
-            <h4>Our Services</h4>
-            <ul>
-              <li><i class="bx bx-chevron-right"></i> <a href="#">Web Design</a></li>
-              <li><i class="bx bx-chevron-right"></i> <a href="#">Web Development</a></li>
-              <li><i class="bx bx-chevron-right"></i> <a href="#">Product Management</a></li>
-              <li><i class="bx bx-chevron-right"></i> <a href="#">Marketing</a></li>
-              <li><i class="bx bx-chevron-right"></i> <a href="#">Graphic Design</a></li>
-            </ul>
-          </div>
-
-          <div class="col-lg-4 col-md-6 footer-newsletter">
-            <h4>Join Our Newsletter</h4>
-            <p>Tamen quem nulla quae legam multos aute sint culpa legam noster magna</p>
-            <form action="" method="post">
-              <input type="email" name="email"><input type="submit" value="Subscribe">
-            </form>
-          </div>
-
-        </div>
-      </div>
-    </div>
-
     <div class="container d-md-flex py-4">
-
       <div class="mr-md-auto text-center text-md-left">
-        <div class="copyright">
-          &copy; Copyright <strong><span>Presento</span></strong>. All Rights Reserved
-        </div>
-        <div class="credits">
-          <!-- All the links in the footer should remain intact. -->
-          <!-- You can delete the links only if you purchased the pro version. -->
-          <!-- Licensing information: https://bootstrapmade.com/license/ -->
-          <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/presento-bootstrap-corporate-template/ -->
-          Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+        <div>
+          <img src="assets/img/uga-logo.png" alt="Avatar" style="width: 80px; margin: 16px">
+          <img src="assets/img/ensimag-logo.png" alt="Avatar" style="width: 80px; margin: 16px">
         </div>
       </div>
       <div class="social-links text-center text-md-right pt-3 pt-md-0">

@@ -781,9 +781,9 @@ section {
 }
 
 /*--------------------------------------------------------------
-# Services
+# Visualizations
 --------------------------------------------------------------*/
-.services .icon-box {
+.viz .icon-box {
   margin-bottom: 20px;
   padding: 30px;
   border-radius: 6px;
@@ -791,37 +791,37 @@ section {
   transition: 0.3s;
 }
 
-.services .icon-box:hover {
+.viz .icon-box:hover {
   background: #2b2b2b;
 }
 
-.services .icon-box i {
+.viz .icon-box i {
   float: left;
   color: #e03a3c;
   font-size: 40px;
 }
 
-.services .icon-box h4 {
+.viz .icon-box h4 {
   margin-left: 70px;
   font-weight: 700;
   margin-bottom: 15px;
   font-size: 18px;
 }
 
-.services .icon-box h4 a {
+.viz .icon-box h4 a {
   color: #fff;
   transition: 0.3s;
 }
 
-.services .icon-box h4 a:hover {
+.viz .icon-box h4 a:hover {
   text-decoration: underline;
 }
 
-.services .icon-box .icon-box:hover h4 a {
+.viz .icon-box .icon-box:hover h4 a {
   color: #e03a3c;
 }
 
-.services .icon-box p {
+.viz .icon-box p {
   margin-left: 70px;
   line-height: 24px;
   font-size: 14px;
