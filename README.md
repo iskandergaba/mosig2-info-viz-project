@@ -1,89 +1,23 @@
-# 2020-carbon
+# Information Visualization 2020-21 
 
-Work travels by members of a research lab.
+A data information visualization project that seeks to help users visually answer a few questions regarding the data trends in a CO<sub>2</sub> emissions dataset of academic laboratory work travels with all identifying information anonymized using Game of Thrones character and location names.
 
-## Content
+## Group Members
+- **[Iskander Gaba](mailto:iskander.gaba@etu.univ-grenoble-alpes.fr)**
+- **[Moncif Toubouh](mailto:moncif.toubouh@grenoble-inp.org)**
 
-* **data/** the data in [tsv](https://bl.ocks.org/mbostock/3305937).
-	* **missions.tsv** trips details
-	* **users.tsv** members of the lab (pseudonymized)
-	* **places.tsv** travel destinations
-	* **countries.tsv** country codes
-* **viz/** sample visualisations
-* **vendor/** vendorized d3 v6.2.0 library
+## Visualizations
+We propose two [D3.js](https://d3js.org/) visualizations:
 
-## Data structure
+- **[CO<sub>2</sub> Emissions Grouped Bar Chart](viz/co2-bar-chart.html.html):** A dynamic grouped bar chart that details the CO<sub>2</sub> emissions by different decompositions of travelers so as to understand the impact of the region, house, title, rank, and institution on the CO<sub>2</sub> emissions.
+- **[CO<sub>2</sub> Emissions by Continent](viz/co2-bar-chart.html.html):** A muti-line plot that depicts the CO<sub>2</sub> emissions amont per continent destination over the years so as to understand the data trends of each continent destination and compare them to one another.
 
-The attributes present in the **mission** table are:
+## Requirements
+All what you need to run this project is a machine with [Python](https://www.python.org) and a JavaScript-capable modern browser (we recommend [Mozilla Firefox](https://www.mozilla.org/en-US/firefox/new)) installed.
 
-* **mission_id** a unique id for missions (5615 values)
-* **user_id** reference to a record in the **users.tsv** table
-* **place_id** reference to a record in the **places.tsv** table
-* **date** date of the trip in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format
-* **duration** duration of the stay in hours
-* **mode** main mode of transport {'public', 'car', 'train', 'plane', 'other'}
-* **co2** CO2 emmission per person per km
-
-The **co2** value is computed using the following algorithm and values from [DEFRA 2016](https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2016):
-
-    def co2(mode, country, distance):
-    	"""kCO2 par km per person
-    	data from DEFRA 2016
-    	"""
-    	if mode == "other":
-    		if distance < 10:
-    			mode = "public"
-    		elif distance < 100:
-    			mode = "car"
-    		else:
-    			mode = "train"
-    		if country != "FR":
-    			mode = "plane"
-    	
-    	if mode == "public":
-    		kg = 0.075        # average between bus/tram/underground
-    	elif mode == "car":
-    		kg = 0.20033      # medium car
-    	elif mode == "train": # presumably in france
-    		kg = 0.01214
-    	elif mode == "plane": # economy class
-    		if country == "FR":
-    			kg = 0.16508
-    		elif continents[country] == "EU":
-    			kg = 0.14678
-    		else:
-    			kg = 0.13712
-    	else:
-    		assert False
-    		
-    	return kg
-
-The attributes present in the **mission** table are:
-
-* **user_id** a unique id for users (512 values)
-* **name** the pseudonym for the user (unique for a given **house**)
-* **house** groups of users (39 houses)
-* **region** groups of houses (7 regions)
-* **title** kind of user (4 titles)
-* **rank** rank of user (ordered levels from 'A' (intern) to 'K' (emeritus), comparable accross titles)
-* **institution** intitution of user (4 institutions + none)
-
-The attributes present in the **place** table are:
-
-* **place_id** a unique id for places (627 values)
-* **distance** distance from Grenoble in km
-* **country** [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) country code, usable for lookups into **countries.tsv** table
-
-The actual locations are not given to reduce the chance of leaking private information.
-
-The attributes present in the **countries** table are:
-
-* **alpha2** the [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) country code (252 values)
-* **country** name of the country in english (source [GeoNames](https://www.geonames.org/countries/))
-* **continent** 2 letters code for continent
-
-
-## Sample visualizations
-
-* **viz/0-users.html** a basic HTML list of the users generated with [D3.js](https://d3js.org/)
-* **viz/1-co2-cdf.html** a cumulative distribution function plot showing how to load several tables and join them, and some basic interaction
+## Running Instructions
+- Unpack the project archive.
+- In project root directory, start a web server using the command `python3 -m http.server`.
+- Open in your web browser [http://localhost:8000](http://localhost:8000) to see the project's landing page.
+- Scroll down the **Visualizations** section. Each visualization is represented by a card with text explaining how the visualisations are answering the questions we chose (i.e. serving as a short report per visualization).
+- To open visualization, click on the title on of the card and you will be redirected to the visualization page.
